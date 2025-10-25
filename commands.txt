@@ -1,0 +1,131 @@
+Signup : https://openweathermap.org/
+Install: Winscp
+
+
+
+### AWS EC2 instance and security group creation
+- t2.xlarge instance
+- 32GB of storage recommended
+- Allow ports 4000-38888
+- Connect to ec2 via ssh
+
+
+#Create New Role with s3fullaccess and ec3fullaccess
+Action -> security -> Modify Iam Role
+
+# connect to EC2
+ssh -i "dependency.pem" ec2-user@ec2-174-129-182-6.compute-1.amazonaws.com
+
+# Copy files to EC2
+scp -r -i "dependency.pem" docker_exp ec2-user@ec2-174-129-182-6.compute-1.amazonaws.com:/home/ec2-user/docker_exp
+
+# connect with port forwarding
+ssh -i "dependency.pem" ec2-54-196-203-200.compute-1.amazonaws.com -L 8080:localhost:8080 -L 5050:localhost:5050 -L 5433:localhost:5433 -L 5555:localhost:5555 
+
+- Commands to install Docker
+sudo yum update -y
+sudo yum install docker
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo gpasswd -a $USER docker
+newgrp docker
+sudo yum install python-pip
+sudo pip install docker-compose
+
+#Start Docker: 
+sudo systemctl start docker
+#check ps:
+ps
+#Stop Docker:
+sudo systemctl stop docker
+
+
+cd docker_exp 
+docker-compose up
+
+#How to access tools in local machine
+    List Docker containers running: docker ps
+    Airflow Lab at: http://localhost:8080/ 
+    pgAdmin at: http://localhost:5050/ 
+
+
+## Connect PgAdmin
+Username: admin@admin.com
+Password: admin
+
+New Server : Airflow Postgres
+Host name / address : postgres
+Port : 5432
+Maintenance database : airflow
+Username : airflow
+Password : airflow
+
+Create Table in PostgreSQL:
+
+CREATE TABLE IF NOT EXISTS weather_data (
+    id SERIAL PRIMARY KEY,
+    city VARCHAR(50),
+    description VARCHAR(100),
+    temperature_f FLOAT,
+    feels_like_f FLOAT,
+    min_temp_f FLOAT,
+    max_temp_f FLOAT,
+    pressure INTEGER,
+    humidity INTEGER,
+    wind_speed FLOAT,
+    time_of_record TIMESTAMP,
+    sunrise TIMESTAMP,
+    sunset TIMESTAMP
+);
+
+
+
+##Airflow Connection 
+
+Admin -> Connection
+
+Create Two Connection
+
+1. Connection
+Connection ID : weathermap_api
+Connection Type : http
+Host: https://api.openweathermap.org
+Press Save
+
+2. Connection
+Connection ID : postgres_default
+Connection Type : Postgres
+
+Host : postgres
+Login : airflow
+Password : airflow 
+Port : 5432
+Database : airflow
+
+
+
+### Get Access Token
+
+Optional: 
+sudo rm -rf /usr/local/lib/python3.9/site-packages/urllib3*
+sudo /usr/bin/python3 -m pip install --upgrade --target /usr/lib/python3.9/site-packages urllib3
+
+sudo yum install awscli
+aws configure
+aws sts get-session-token
+
+
+###Login Winscp
+
+File protocol : SFTP
+Host name : <EC2 Public DNS>
+Port : 22
+User name: ec2-user
+
+Advanced -> SSH -> Authentication -> Private key file -> Select .Pem file
+Press ok 
+Press Login 
+
+### Give Permission 
+
+sudo chown -R ec2-user:ec2-user /home/ec2-user/docker_exp
