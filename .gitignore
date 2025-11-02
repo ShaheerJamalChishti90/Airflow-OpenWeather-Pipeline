@@ -1,5 +1,6 @@
 *.pem
 *.ppk
 ./docker_exp/*.pem
+./docker_exp/*.ppk
 ./pem files for p9-ai instance/*.pem
 ./pem files for p9-ai instance/*.ppk
