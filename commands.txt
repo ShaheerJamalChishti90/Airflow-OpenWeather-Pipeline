@@ -33,6 +33,7 @@ sudo yum install python-pip
 sudo pip install docker-compose
 
 #Start Docker: 
+echo -e "AIRFLOW_UID=50000" > .env 
 sudo systemctl start docker
 #check ps:
 ps
